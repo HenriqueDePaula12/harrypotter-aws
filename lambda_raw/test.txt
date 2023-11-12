@@ -1,0 +1,13 @@
+###### TESTE DA IMAGEM LOCAL #####
+
+1 - docker build -t test .
+2 - docker run -p 9000:8080 test
+2 - curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+
+###### IMAGEM PARA O ECR #####
+################ DEPOIS QUE A IMAGEM ECR ESTIVER CRIADA, CRIAR A LABMDA ############################
+
+0 - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin XXXXXXXXXX.dkr.ecr.us-east-1.amazonaws.com
+1 - docker build -t harry-potter-characters-img .
+2 - docker tag harry-potter-characters-img:latest XXXXXXXXXX.dkr.ecr.us-east-1.amazonaws.com/harry-potter-characters-img:latest
+3 - docker push XXXXXXXXXX.dkr.ecr.us-east-1.amazonaws.com/harry-potter-characters-img:latest
