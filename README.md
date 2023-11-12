@@ -190,6 +190,10 @@ def lambda_handler(event=None, context=None):
 
 ```
 
+### Recursos Criados
+
+![lambdas](https://github.com/HenriqueDePaula12/harrypotter-aws/blob/master/prints/athena.png)
+
 ## Acesso aos códigos e estruturas gerais
 
 - [lambda_raw](https://github.com/HenriqueDePaula12/harrypotter-aws/blob/master/lambda_raw)
