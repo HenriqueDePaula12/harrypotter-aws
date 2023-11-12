@@ -2,9 +2,23 @@
 
 Olá!
 
-Este é o meu segundo repositório, que trata de ponta a ponta uma pipeline de dados abertos sobre Harry Potter, relacionados aos personagens e curiosidades, como idade, descrição de sua varinha e muito mais, com o uso de Pandas, Requests, AwsWrangler, Boto3!
+Esse projeto de ETL na AWS, trata de ponta a ponta uma pipeline de dados abertos sobre Harry Potter, relacionados aos personagens e curiosidades, como idade, descrição de sua varinha e muito mais, com o uso de Pandas, Requests, AwsWrangler, Boto3!
+
+Lista de ferramentas utilizadas:
+
+## AWS Tools
+- Athena
+- ECR
+- Glue Crawler
+- Glue Database
+- Lambda Function
+- S3
+- Step Functions
+- IAM
 
 ## LAMBDA_RAW
+
+Vamos entender o que esta lambda function está fazendo. Essa função Lambda está realizando uma requisição na API de Harry Potter e, com as informações obtidas nessa solicitação, estamos convertendo para um dataframe e salvando no S3 dentro do nosso bucket, na zona RAW, no formato parquet.
 
 ```python
 import requests
@@ -47,6 +61,8 @@ def lambda_handler(event=None, context=None):
     print('Executado com Sucesso')
 ```
 ## LAMBDA_DELIVERY
+
+Nesta outra função, estamos lendo as informações que foram salvas na RAW  e após a leitura, realizamos transformações simples, como a alteração dos nomes das colunas do inglês para o português e, em seguida, enriquecemos o dataframe adicionando colunas adicionais com informações já existente nos dados. Por fim, salvamos os dados enriquecidos novamente no S3, na zona, DELIVERY.
 
 ```python
 import pandas as pd
@@ -126,6 +142,8 @@ def lambda_handler(event=None, context=None):
 ```
 ## LAMBDA_GLUE
 
+E por fim, estamos fazendo uma verificação para ver se o database no glue já é existente, se não, será criado o recurso. Após a criação do mesmo, é executada a criação do Crawler para que seja possível criar no Athena uma tabela para realizar consultas SQL dentro do Athena, seguindo a mesma lógica de criação do glue database.
+
 ```python
 import boto3
 
@@ -171,21 +189,13 @@ def lambda_handler(event=None, context=None):
 
 
 ```
-Lista de ferramentas utilizadas:
 
-## AWS Tools
-- Athena
-- ECR
-- Glue Crawler
-- Glue Database
-- Lambda Function
-- S3
-- Step Functions
+## Acesso aos códigos e estruturas gerais
 
-## Acesso ao Código e aos Dados
-
-- O código-fonte deste projeto pode ser encontrado [aqui](link-para-o-código).
-- Os dados brutos podem ser obtidos a partir deste [link para os dados](link-para-os-dados).
+- [lambda_raw](https://github.com/HenriqueDePaula12/harrypotter-aws/blob/master/lambda_raw)
+- [lambda_delivery](https://github.com/HenriqueDePaula12/harrypotter-aws/blob/master/lambda_delivery)
+- [lambda_glue](https://github.com/HenriqueDePaula12/harrypotter-aws/blob/master/lambda_glue)
+- Os dados brutos podem ser obtidos a partir deste [link](https://hp-api.onrender.com/api/characters).
 
 ## Observações
 
