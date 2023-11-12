@@ -190,9 +190,111 @@ def lambda_handler(event=None, context=None):
 
 ```
 
+## STEP_FUNCTION
+
+A orquestração é realizada ondemand via StepFunction, ao invés de ferramentas como Airflow. Nesse caso estamos triggando nossas lambdas function acima, uma após a outra e por fim, triggando o crawler, também ondemand, para disponbilizar o recurso no Athena.
+
+```json
+{
+    "Comment": "A description of my state machine",
+    "StartAt": "Lambda Invoke Raw",
+    "States": {
+      "Lambda Invoke Raw": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "OutputPath": "$.Payload",
+        "Parameters": {
+          "FunctionName": "arn:aws:lambda:us-east-1:XXXXXXXXXXX:function:lambda_function_harry_potter_characters:$LATEST"
+        },
+        "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds": 1,
+            "MaxAttempts": 3,
+            "BackoffRate": 2
+          }
+        ],
+        "Next": "Lambda Invoke Delivery"
+      },
+      "Lambda Invoke Delivery": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "OutputPath": "$.Payload",
+        "Parameters": {
+          "FunctionName": "arn:aws:lambda:us-east-1:XXXXXXXXXXX:function:lambda_function_harry_potter_characters_enriched:$LATEST"
+        },
+        "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds": 1,
+            "MaxAttempts": 3,
+            "BackoffRate": 2
+          }
+        ],
+        "Next": "Lambda Invoke Glue"
+      },
+      "Lambda Invoke Glue": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::lambda:invoke",
+        "OutputPath": "$.Payload",
+        "Parameters": {
+          "FunctionName": "arn:aws:lambda:us-east-1:XXXXXXXXXXX:function:lambda_function_glue:$LATEST"
+        },
+        "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds": 1,
+            "MaxAttempts": 3,
+            "BackoffRate": 2
+          }
+        ],
+        "Next": "StartCrawler"
+      },
+      "StartCrawler": {
+        "Type": "Task",
+        "Parameters": {
+          "Name": "crawler_harry"
+        },
+        "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+        "End": true
+      }
+    }
+  }
+```
+
 ### Recursos Criados
 
-![lambdas](https://github.com/HenriqueDePaula12/harrypotter-aws/blob/master/prints/athena.png)
+#### Dados no Bucket (Lake)
+
+![data_bucket](prints/data_bucket.png)
+![data_bucket_delivery](prints/data_bucket_delivery.png)
+
+#### Lambdas
+
+![lambdas](prints/lambdas.png)
+
+#### StepFunction
+
+![lambdas](prints/step_function.png)
+
+#### Athena
+
+![lambdas](prints/athena.png)
 
 ## Acesso aos códigos e estruturas gerais
 
